@@ -1,0 +1,138 @@
+﻿@model Login
+
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <title>Iniciar sesión</title>
+
+    <!-- GOOGLE FONTS -->
+    <link href="~/assets/css/fonts-face.css" rel="stylesheet" />
+    <link href="~/assets/css/materialdesignicons.min.css" rel="stylesheet" />
+
+    <!-- PLUGINS CSS STYLES -->
+    <link href="~/assets/plugins/nprogress/nprogress.css" rel="stylesheet">
+
+    <!-- LINDA SONRISA CSS -->
+    <link rel="stylesheet" href="~/assets/css/styles.css" />
+    <style>
+        input[type="text"]:invalid,
+        input[type="password"]:invalid {
+            border-color: #fe5461;
+            padding-right: calc(1.5em + 1.18rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' fill='none' stroke='%23fe5461' viewBox='0 0 12 12'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23fe5461' stroke='none'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.295rem) center;
+            background-size: calc(0.75em + 0.59rem) calc(0.75em + 0.59rem);
+        }
+
+        input[type="text"]:valid,
+        input[type="password"]:valid {
+            border-color: #29cc97;
+            padding-right: calc(1.5em + 1.18rem);
+            background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' width='8' height='8' viewBox='0 0 8 8'%3e%3cpath fill='%2329cc97' d='M2.3 6.73L.6 4.53c-.4-1.04.46-1.4 1.1-.8l1.1 1.4 3.4-3.8c.6-.63 1.6-.27 1.2.7l-4 4.6c-.43.5-.8.4-1.1.1z'/%3e%3c/svg%3e");
+            background-repeat: no-repeat;
+            background-position: right calc(0.375em + 0.295rem) center;
+            background-size: calc(0.75em + 0.59rem) calc(0.75em + 0.59rem);
+        }
+    </style>
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+    <script src="~/assets/plugins/nprogress/nprogress.js"></script>
+    <script>if (window.module) module = window.module;</script>
+</head>
+<body style="background: linear-gradient(180deg, #3fabad 0%, #212a39 66%);">
+
+    @Html.AntiForgeryToken()
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+    <script>
+        NProgress.configure({ showSpinner: false });
+        NProgress.start();
+    </script>
+    <script>if (window.module) module = window.module;</script>
+
+    <div class="container d-flex flex-column justify-content-between vh-100">
+        <div class="row justify-content-center mt-5">
+            <div class="col-lg-6 col-md-10">
+                <div class="card">
+                    <div class="card-header bg-primary">
+                        <div class="app-brand">
+                            <a>
+                                <span class="brand-name" style="margin-left:0">Panel de control</span>
+                            </a>
+                        </div>
+                    </div>
+                    <div class="card-body p-4">
+
+                        <div id="ValidationSummaryLogin"></div>
+
+                        <form id="LoginActionForm" asp-action="Login" autocomplete="off">
+                            <div class="row">
+                                <div class="form-group col-md-12 mb-4">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb p-0">
+                                            <li class="breadcrumb-item" style="margin-right:0.5rem;">
+                                                <a style="color: #fe5461;">
+                                                    (<span class="mdi mdi-asterisk"></span>)
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <label asp-for="Rut"></label>
+                                            </li>
+                                        </ol>
+                                    </nav>
+                                    <input asp-for="Rut" class="form-control" pattern="[Kk0-9\.-]+" placeholder="Ej. 12.345.678-K" minlength="11" maxlength="12" required />
+                                </div>
+                                <div class="form-group col-md-12 mb-4">
+                                    <nav aria-label="breadcrumb">
+                                        <ol class="breadcrumb p-0">
+                                            <li class="breadcrumb-item" style="margin-right:0.5rem;">
+                                                <a style="color: #fe5461;">
+                                                    (<span class="mdi mdi-asterisk"></span>)
+                                                </a>
+                                            </li>
+                                            <li>
+                                                <label asp-for="Password"></label>
+                                            </li>
+                                        </ol>
+                                    </nav>
+                                    <input asp-for="Password" class="form-control" maxlength="50" required />
+                                </div>
+                                <div class="col-md-12">
+                                    @*<div class="d-flex my-2 justify-content-between">
+                                            <div class="d-inline-block mr-3">
+                                                <label asp-for="Recuerdame" class="control control-checkbox">
+                                                    <input asp-for="Recuerdame" type="checkbox" />
+                                                    @Html.DisplayNameFor(m => m.Recuerdame)
+                                                    <div class="control-indicator"></div>
+                                                </label>
+                                            </div>
+                                        </div>*@
+                                    <button id="SubmitLoginButton" type="submit" class="btn btn-lg btn-primary btn-block">Iniciar sesión</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+    <script src="~/assets/plugins/jquery/jquery.min.js"></script>
+    <script src="~/assets/plugins/slimscrollbar/jquery.slimscroll.min.js"></script>
+    <script src="~/assets/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+    <script src="~/assets/js/sleek.bundle.js"></script>
+    <script src="~/js/account/login.js"></script>
+    <script>if (window.module) module = window.module;</script>
+
+</body>
+</html>

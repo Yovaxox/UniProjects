@@ -1,0 +1,82 @@
+﻿<Project Sdk="Microsoft.NET.Sdk.Web">
+  <PropertyGroup>
+    <TargetFramework>netcoreapp2.1</TargetFramework>
+  </PropertyGroup>
+  <ItemGroup>
+    <Compile Remove="Tokens\**" />
+    <Content Remove="Tokens\**" />
+    <EmbeddedResource Remove="Tokens\**" />
+    <None Remove="Tokens\**" />
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Remove="Migrations\20200628175003_Second-Create.cs" />
+    <Compile Remove="Migrations\20200628175003_Second-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200628181404_Second-Create.cs" />
+    <Compile Remove="Migrations\20200628181404_Second-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200701223823_Fifth-Create.cs" />
+    <Compile Remove="Migrations\20200701223823_Fifth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200705170609_Sixth-Create.cs" />
+    <Compile Remove="Migrations\20200705170609_Sixth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200708184734_Seventh-Create.cs" />
+    <Compile Remove="Migrations\20200708184734_Seventh-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200708185054_Seventh-Create.cs" />
+    <Compile Remove="Migrations\20200708185054_Seventh-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200708225531_Seventh-Create.cs" />
+    <Compile Remove="Migrations\20200708225531_Seventh-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200710021250_Eighth-Create.cs" />
+    <Compile Remove="Migrations\20200710021250_Eighth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200712190138_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200712190138_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200712191420_Nineth-Create.cs" />
+    <Compile Remove="Migrations\20200712191420_Nineth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200712191551_Nineth-Create.cs" />
+    <Compile Remove="Migrations\20200712191551_Nineth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200712192734_Eighth-Create.cs" />
+    <Compile Remove="Migrations\20200712192734_Eighth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200713165235_Eighth-Create.cs" />
+    <Compile Remove="Migrations\20200713165235_Eighth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200713170243_Eighth-Create.cs" />
+    <Compile Remove="Migrations\20200713170243_Eighth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715174036_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715174036_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715180020_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715180020_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715182928_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715182928_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715183203_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715183203_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715183638_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715183638_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715183846_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715183846_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715201635_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715201635_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715202208_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715202208_Tenth-Create.Designer.cs" />
+    <Compile Remove="Migrations\20200715202627_Tenth-Create.cs" />
+    <Compile Remove="Migrations\20200715202627_Tenth-Create.Designer.cs" />
+  </ItemGroup>
+  <ItemGroup>
+    <PackageReference Include="ElectronNET.API" Version="5.22.13" />
+    <PackageReference Include="Google.Apis.Drive.v3" Version="1.46.0.1986" />
+    <PackageReference Include="Microsoft.AspNetCore.App" />
+    <PackageReference Include="Microsoft.AspNetCore.Razor.Design" Version="2.1.2" PrivateAssets="All" />
+    <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.10" />
+    <PackageReference Include="Oracle.EntityFrameworkCore" Version="2.19.70" />
+    <PackageReference Include="Oracle.ManagedDataAccess.Core" Version="2.19.70" />
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="wwwroot\css\styles.css">
+      <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+      <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Content Update="electron.manifest.json">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </Content>
+  </ItemGroup>
+  <ItemGroup>
+    <Folder Include="wwwroot\js\" />
+  </ItemGroup>
+</Project>

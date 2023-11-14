@@ -1,0 +1,845 @@
+﻿@model Cliente
+
+@{ ViewData["Title"] = "Clientes"; ; }
+
+@{
+    DateTime fechaActual = DateTime.Now;
+    string formato = "yyyy-MM-dd";
+    IEnumerable<AuthUser> clientes = ViewData["Clientes"] as IEnumerable<AuthUser>;
+
+}
+
+@section Head {
+    <style>
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #e5e9f2;
+        }
+    </style>
+}
+
+<form name="Create" type="hidden" asp-action="Create"></form>
+<form name="Edit" type="hidden" asp-action="Edit"></form>
+<input name="Comunas" type="hidden" value='@Url.Action("GetAll","Comunas")'>
+
+<div class="content">
+    <div class="breadcrumb-wrapper breadcrumb-contacts">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0">
+                    <li class="breadcrumb-item">
+                        <a href="index.html">
+                            <span class="mdi mdi-home"></span>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a>
+                            <span class="mdi mdi-account-child"></span>
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="loadModalAdd()">
+                <i class=" mdi mdi-plus mr-1"></i> Nuevo
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-header card-header-border-bottom d-flex justify-content-between">
+                    <h2>Nuestros clientes</h2>
+                </div>
+                <div class="card-body">
+                    <div class="basic-data-table">
+                        <table id="basic-data-table" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Run)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Email)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Nombre)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.ApPaterno)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.ApMaterno)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FechaNacimiento)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FonoFijo)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FonoMovil)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Direccion)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Comuna)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.EstadoCivil)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Genero)
+                                    </th>
+                                    <th>
+                                        @Html.Raw("Estado")
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.EsExtranjero)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in clientes)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.UserName)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Email)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.Nombre)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.ApPaterno)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.ApMaterno)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.FechaNacimiento)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.FonoFijo)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.FonoMovil)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.Direccion)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.Comuna.Titulo)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.EstadoCivil.Titulo)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Usuario.Genero.Titulo)
+                                    </td>
+                                    <td>
+                                        @Html.Raw(item.IsActive == true ? "Activo" : "Inactivo")
+                                    </td>
+                                    <td>
+                                        @Html.Raw(item.Usuario.EsExtranjero == true ? "Si" : "No")
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" type="button" style="padding:0.3rem 0.5rem" onclick="loadModalView('@Url.Action("Get","Clientes",new {id=item.Id})')">
+                                            <i class="mdi mdi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" type="button" style="padding:0.3rem 0.5rem" onclick="actionDelete('@Url.Action("Delete","Clientes",new {id=item.Id})')">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-model" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form id="ActionForm" autocomplete="off">
+                <div id="modal-header" class="modal-header px-4">
+                    <h5 class="modal-title">Crear cliente</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body px-4">
+                    <div id="ValidationSummary"></div>
+                    <input asp-for="Id" type="hidden" />
+                    <fieldset>
+                        <div class="row mb-2">
+                            <div class="col-lg-6" name="RutDiv">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="Run" class="control-label"></label>
+                                        <input asp-for="Run" class="form-control" pattern="[Kk0-9\.-]+" placeholder="Ej. 12.345.678-K" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" name="EmailDiv">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="Email" class="control-label"></label>
+                                        <input asp-for="Email" class="form-control" type="email" maxlength="50" required placeholder="Ej. dann.gamboa@gmail.com" />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="Nombre" class="control-label"></label>
+                                        <input asp-for="Nombre" class="form-control" maxlength="50" required placeholder="Ej. Danny" />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="ApPaterno" class="control-label"></label>
+                                        <input asp-for="ApPaterno" class="form-control" maxlength="50" required placeholder="Ej. Gamboa" />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="ApMaterno" class="control-label"></label>
+                                        <input asp-for="ApMaterno" class="form-control" maxlength="50" required placeholder="Ej. Caycho" />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="GeneroId" class="control-label"></label>
+                                        <select asp-for="GeneroId" class="form-control" asp-items="ViewBag.GeneroId" required>
+                                            <option hidden selected value="">Selecciona una opción</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="FonoFijo" class="control-label"></label>
+                                        <input asp-for="FonoFijo" class="form-control" minlength="8" maxlength="8" pattern=".{7,}[0-9]+" placeholder="Ej. 22222222" />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="FonoMovil" class="control-label"></label>
+                                        <input asp-for="FonoMovil" class="form-control" minlength="8" maxlength="8" pattern=".{7,}[0-9]+" placeholder="Ej. 99999999" required />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <a style="color: #fe5461;">
+                                            (<span class="mdi mdi-asterisk"></span>)
+                                        </a>
+                                        <label asp-for="FechaNacimiento" class="control-label"></label>
+                                        <input asp-for="FechaNacimiento" class="form-control" min="@fechaActual.AddYears(-120).ToString(formato)" max="@fechaActual.AddMonths(-6).ToString(formato)" type="date" required />
+                                    </div>
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="EstadoCivilId" class="control-label"></label>
+                                        <select asp-for="EstadoCivilId" class="form-control" asp-items="ViewBag.EstadoCivilId">
+                                            <option hidden selected value="">Selecciona una opción</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <a style="color: #fe5461;">
+                                    (<span class="mdi mdi-asterisk"></span>)
+                                </a>
+                                <label asp-for="RegionId" class="control-label"></label>
+                                <select asp-for="RegionId" class="form-control" asp-items="ViewBag.RegionId" required>
+                                    <option hidden selected value="">Selecciona una opción</option>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <a style="color: #fe5461;">
+                                    (<span class="mdi mdi-asterisk"></span>)
+                                </a>
+                                <label asp-for="ComunaId" class="control-label"></label>
+                                <select asp-for="ComunaId" class="form-control" disabled required>
+                                </select>
+                            </div>
+                            <div class="col-md-12 mb-3">
+                                <a style="color: #fe5461;">
+                                    (<span class="mdi mdi-asterisk"></span>)
+                                </a>
+                                <label asp-for="Direccion" class="control-label"></label>
+                                <input asp-for="Direccion" class="form-control" required />
+                            </div>
+                            <div class="col-lg-6" name="CreadoElDiv">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="CreadoEl" class="control-label"></label>
+                                        <input asp-for="CreadoEl" class="form-control" type="text" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6" name="ActualizadoElDiv">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="ActualizadoEl" class="control-label"></label>
+                                        <input asp-for="ActualizadoEl" class="form-control" type="text" disabled />
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-12">
+                                <label asp-for="EsExtranjero" class="control-label">
+                                    @Html.DisplayNameFor(model => model.EsExtranjero)
+                                </label>
+                            </div>
+                            <div class="col-md-12 mb-5">
+                                <label class="switch switch-text switch-primary  form-control-label">
+                                    <input asp-for="EsExtranjero" class="switch-input form-check-input" value="false">
+                                    <span class="switch-label" data-on="Si" data-off="No"></span>
+                                    <span class="switch-handle"></span>
+                                </label>
+                            </div>
+                            <div class="col-md-12">
+                                <a style="color: #fe5461;">
+                                    (<span class="mdi mdi-asterisk"></span>)
+                                </a><label style="color:black" class="control-label">Campos obligatorios</label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div id="modal-footer" class="modal-footer px-4">
+                    <button class="mb-1 btn btn-primary" type="button" onclick="resetForm()">
+                        <i class="mdi mdi-broom"></i>
+                    </button>
+                    <button type="button" class="btn btn-secondary btn-default" onclick="closeModel()">Cancelar</button>
+                    <button id="SubmitButton" type="submit" class="btn btn-primary btn-default">Enviar al formulario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts{
+    <script>
+        jQuery(document).ready(function () {
+
+            jQuery('#basic-data-table').DataTable({
+                "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                "pageLength": 25,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false, "width": "1%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar_MENU_registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+        });
+
+        $("#EsExtranjero").on("click", function () {
+            if ($(this).val() == "false") {
+                $(this).val("true");
+            } else {
+                $(this).val("false");
+            }
+        });
+
+        function loadModalAdd() {
+
+            var content = `<h5 class="modal-title">Crear cliente</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>`;
+
+            var header = $('#modal-header');
+            header.attr("class", "modal-header px-4");
+
+            header.html(content);
+
+            $("[name='CreadoElDiv']").hide();
+            $("[name='ActualizadoElDiv']").hide();
+
+            $("[name='RutDiv']").show();
+            $("[name='EmailDiv']").attr('class', 'col-lg-6');
+
+            $("#ActionForm").attr("action", $("[name='Create']").attr("action"));
+            $("#ActionForm").attr("method", $("[name='Create']").attr("method"));
+            $("#ActionForm").attr("enctype", $("[name='Create']").attr("enctype"));
+            $("#ActionForm").attr("name", "CreateForm");
+
+            $('fieldset').prop('disabled', false);
+
+            $("#ComunaId").html(`<option hidden selected value="">Selecciona una opción</option>`);
+
+            $('#modal-footer').show();
+
+            $('#modal-model').modal({
+                backdrop: 'static'
+            });
+
+        }
+
+        jQuery('#RegionId').change(function () {
+            getAllComunas(null);
+        });
+
+        function getAllComunas(idComuna) {
+            var token = $("[name='__RequestVerificationToken']").val();
+            var idRegion = $('#RegionId').children("option:selected").val();
+
+            var select = $('#ComunaId');
+
+            var url = $('input[name="Comunas"]').val();
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    __RequestVerificationToken: token,
+                    id: idRegion,
+                },
+                success: function (data) {
+
+                    select.html(`<option hidden selected value="">Selecciona una opción</option>`);
+                    $.each(data, function (idx, row) {
+                        $.each(row, function (idx, row) {
+                            select.append('<option value="' + row.id + '">' + row.titulo + '</option>');
+                        });
+                    });
+
+                    select.prop('disabled', false);
+
+                    if (idComuna !== null) {
+                        select.val(idComuna);
+                        select.prop('disabled', true);
+                    }
+                }
+            });
+        }
+
+        function actionDelete(url) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, elimínalo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Delete",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha sido eliminado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        $(function () {
+            $("#ActionForm").submit(function (e) {
+                e.preventDefault();
+
+                if ($(this).attr("name") == "CreateForm") {
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, listo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+
+                        if (result.value) {
+
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            $.ajax({
+                                url: formAction,
+                                data: {
+                                    __RequestVerificationToken: token,
+                                    Nombre: $("#Nombre").val(),
+                                    ApPaterno: $("#ApPaterno").val(),
+                                    ApMaterno: $("#ApMaterno").val(),
+                                    FonoMovil: $("#FonoMovil").val(),
+                                    FonoFijo: $("#FonoFijo").val(),
+                                    Email: $("#Email").val(),
+                                    Run: $("#Run").val(),
+                                    Direccion: $("#Direccion").val(),
+                                    ComunaId: $("#ComunaId").val(),
+                                    GeneroId: $("#GeneroId").val(),
+                                    EstadoCivilId: $("#EstadoCivilId").val(),
+                                    EsExtranjero: $("#EsExtranjero").val(),
+                                },
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+
+                        } else if (
+                            result.dismiss === Swal.DismissReason.cancel
+                        ) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Cancelado',
+                                text: 'El elemento no ha sido creado',
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    })
+                }
+
+                if ($(this).attr("name") == "EditForm") {
+
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, listo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+
+                        if (result.value) {
+
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            $.ajax({
+                                url: formAction,
+                                data: {
+                                    __RequestVerificationToken: token,
+                                    Id: $("#Id").val(),
+                                    Nombre: $("#Nombre").val(),
+                                    ApPaterno: $("#ApPaterno").val(),
+                                    ApMaterno: $("#ApMaterno").val(),
+                                    FonoMovil: $("#FonoMovil").val(),
+                                    FonoFijo: $("#FonoFijo").val(),
+                                    Rut: $("#Rut").val(),
+                                    Email: $("#Email").val(),
+                                    FechaNacimiento: $("#FechaNacimiento").val(),
+                                    Direccion: $("#Direccion").val(),
+                                    ComunaId: $("#ComunaId").val(),
+                                    GeneroId: $("#GeneroId").val(),
+                                    EstadoCivilId: $("#EstadoCivilId").val(),
+                                    RoleId: $("#RoleId").val(),
+                                    UserId: $("#UserId").val(),
+                                },
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+
+                        } else if (
+                            result.dismiss === Swal.DismissReason.cancel
+                        ) {
+                            Swal.fire({
+                                icon: 'warning',
+                                title: 'Cancelado',
+                                text: 'El elemento no ha sido modificado',
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    })
+                }
+            });
+        });
+
+        function displayValidationErrors(errors) {
+            var $div = $("#ValidationSummary");
+
+            $div.html(`<div class="alert alert-danger alert-dismissible" role="alert">
+                                                        <h4 class="alert-heading" style="margin-bottom: 1rem;">Errores!</h4>
+                                                        <div id="ListOfErors">
+                                                        </div>
+                                                        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                        <span aria-hidden="true">&times;</span>
+                                                        </button>
+                                                   </div >`);
+
+            var $list = $("#ListOfErors");
+
+            $list.empty();
+
+            var $length = errors.length;
+
+            $.each(errors, function (idx, errorMessage) {
+
+                var $hr = '<hr>';
+
+                if ((idx + 1) == $length) {
+                    $hr = '';
+                }
+
+                $list.append('<p class="mt-1">' + errorMessage + '</p>' + $hr);
+            });
+        };
+
+        jQuery(document).ajaxStart(function () {
+            NProgress.configure({ showSpinner: false });
+            NProgress.start();
+        });
+
+        jQuery(document).ajaxStop(function () {
+            NProgress.done();
+        });
+    </script>
+
+}

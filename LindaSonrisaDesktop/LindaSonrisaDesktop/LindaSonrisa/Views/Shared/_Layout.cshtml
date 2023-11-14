@@ -1,0 +1,299 @@
+﻿@inject Microsoft.AspNetCore.Identity.SignInManager<User> singInManager;
+
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="utf-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="description" content="">
+
+    <title>@ViewData["Title"] - Linda Sonrisa</title>
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+    <!-- GOOGLE FONTS -->
+    <link href="~/assets/css/fonts-face.css" rel="stylesheet" />
+    <link href="~/assets/css/materialdesignicons.min.css" rel="stylesheet" />
+
+    <!-- JQUERY -->
+    <script src="~/assets/plugins/jquery/jquery.min.js"></script>
+
+    <!-- PLUGINS CSS STYLES -->
+    <link href="~/assets/plugins/nprogress/nprogress.css" rel="stylesheet">
+    <link href="~/assets/plugins/data-tables/datatables.bootstrap4.min.css" rel="stylesheet" />
+
+    <!-- LINDA SONRISA CSS -->
+    <link rel="stylesheet" href="~/assets/css/styles.css" />
+
+    @RenderSection("Head", false)
+
+    <style>
+        .expendable-data-table,
+        .basic-data-table,
+        .hoverable-data-table {
+            overflow-x: scroll;
+            padding-bottom: 1.88rem;
+        }
+
+        @@media (min-width: 1500px) {
+            .expendable-data-table,
+            .basic-data-table,
+            .hoverable-data-table {
+                overflow-x: scroll;
+            }
+        }
+    </style>
+
+    <script src="~/assets/plugins/nprogress/nprogress.js"></script>
+
+    <!-- Insert this line after script imports -->
+    <script>if (window.module) module = window.module;</script>
+</head>
+
+<body class="header-fixed sidebar-fixed sidebar-dark header-light" id="body">
+
+    <div class="wrapper">
+        <!-- Insert this line above script imports  -->
+        <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+        <script>
+            NProgress.configure({ showSpinner: false });
+            NProgress.start();
+        </script>
+        <!-- Insert this line after script imports -->
+        <script>if (window.module) module = window.module;</script>
+        <!--
+      ====================================
+      ——— LEFT SIDEBAR WITH FOOTER
+      =====================================
+    -->
+        <aside class="left-sidebar bg-sidebar">
+            <div id="sidebar" class="sidebar sidebar-with-footer">
+                <!-- Aplication Brand -->
+                <div class="app-brand">
+                    <a>
+                        <img class="brand-icon" src="~/images/tooth.svg" preserveAspectRatio="xMidYMid" width="30" height="33">
+                        <span class="brand-name text-truncate">Linda Sonrisa</span>
+                    </a>
+                </div>
+                <!-- begin sidebar scrollbar -->
+                <div class="sidebar">
+                    <!-- sidebar menu -->
+                    @if (User.IsInRole("Administrador"))
+                    {
+                    <ul class="nav sidebar-inner" id="sidebar-menu">
+                        <li class='@Html.IsActionActive("Clientes","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Clientes">
+                                <i class="mdi mdi-account-child"></i>
+                                <span class="nav-text">Clientes</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Reservas","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Reservas">
+                                <i class="mdi mdi-calendar"></i>
+                                <span class="nav-text">Reservas</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Modulos","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Modulos">
+                                <i class="mdi mdi-view-module"></i>
+                                <span class="nav-text">Módulos</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Empleados","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Empleados">
+                                <i class="mdi mdi-account-card-details"></i>
+                                <span class="nav-text">Empleados</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Servicios","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Servicios">
+                                <i class="mdi mdi-medical-bag"></i>
+                                <span class="nav-text">Servicios</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Ordenes","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Ordenes">
+                                <i class="mdi mdi-cart"></i>
+                                <span class="nav-text">Órdenes</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Productos","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Productos">
+                                <i class="mdi mdi-package-variant-closed"></i>
+                                <span class="nav-text">Productos</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Categorias","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Categorias">
+                                <i class="mdi mdi-dots-horizontal-circle-outline"></i>
+                                <span class="nav-text">Categorías</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Contactos","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Contactos">
+                                <i class="mdi mdi-contacts"></i>
+                                <span class="nav-text">Contactos</span><b class="caret"></b>
+                            </a>
+                        </li>
+                        <li class='@Html.IsActionActive("Proveedores","Index")'>
+                            <a class="sidenav-item-link" asp-action="Index" asp-controller="Proveedores">
+                                <i class="mdi mdi-truck"></i>
+                                <span class="nav-text">Proveedores</span><b class="caret"></b>
+                            </a>
+                        </li>
+                    </ul>
+                    }
+
+                    @if (User.IsInRole("Odontólogo"))
+                    {
+
+                    }
+
+                    @if (User.IsInRole("Recepcionista"))
+                    {
+
+                    }
+                </div>
+            </div>
+        </aside>
+        <div class="page-wrapper">
+            <!-- Header -->
+            <header class="main-header " id="header">
+                <nav class="navbar navbar-static-top navbar-expand-lg">
+                    <!-- Sidebar toggle button -->
+                    <button id="sidebar-toggler" class="sidebar-toggle">
+                    </button>
+                    <!-- search form -->
+                    <div class="search-form d-none d-lg-inline-block">
+                        <div class="input-group">
+                            <button type="button" name="search" id="search-btn" class="btn btn-flat">
+                                <i class="mdi mdi-magnify"></i>
+                            </button>
+                            <input type="text" name="query" id="search-input" class="form-control" placeholder="¿Qué desea buscar?" autofocus autocomplete="off" />
+                        </div>
+                        <div id="search-results-container">
+                            <ul id="search-results"></ul>
+                        </div>
+                    </div>
+                    <div class="navbar-right ">
+                        <ul class="nav navbar-nav">
+                            <li class="right-sidebar-in right-sidebar-2-menu">
+                                <i class="mdi mdi-settings mdi-spin"></i>
+                            </li>
+                            <!-- User Account -->
+                            @if (singInManager.IsSignedIn(User))
+                            {
+                                <li class="dropdown user-menu">
+                                    <button href="javascript:0" class="dropdown-toggle nav-link" data-toggle="dropdown">
+                                        <span class="d-none d-lg-inline-block">@User.Identity.Name</span>
+                                    </button>
+                                    <ul class="dropdown-menu dropdown-menu-right">
+                                        <!-- User image -->
+                                        <li>
+                                            <a href="#">
+                                                <i class="mdi mdi-account"></i> Mi perfil
+                                            </a>
+                                        </li>
+                                        <li class="right-sidebar-in">
+                                            <a href="javascript:0"> <i class="mdi mdi-settings"></i> Configuraciones </a>
+                                        </li>
+                                        <li class="dropdown-footer">
+                                            <form id="logout-form" method="post" asp-action="Logout" asp-controller="Account">
+                                                <a href="javascript:0" onclick="document.getElementById('logout-form').submit();"> <i class="mdi mdi-logout"></i> Cerrar sesión </a>
+                                            </form>
+                                        </li>
+                                    </ul>
+                                </li>
+                            }
+                        </ul>
+                    </div>
+                </nav>
+            </header>
+            <div class="content-wrapper">
+                @RenderBody()
+
+                <div class="right-sidebar-2">
+                    <div class="right-sidebar-container-2">
+                        <div class="slim-scroll-right-sidebar-2">
+                            <div class="right-sidebar-2-header">
+                                <h2>Opciones de diseño</h2>
+                                <p>Configuraciones de interfaz de usuario</p>
+                                <div class="btn-close-right-sidebar-2">
+                                    <i class="mdi mdi-window-close"></i>
+                                </div>
+                            </div>
+                            <div class="right-sidebar-2-body">
+                                <span class="right-sidebar-2-subtitle">Diseño de encabezado</span>
+                                <div class="no-col-space">
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 header-fixed-to btn-right-sidebar-2-active">Fijo</a>
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 header-static-to">Estático</a>
+                                </div>
+                                <span class="right-sidebar-2-subtitle">Diseño de barra lateral</span>
+                                <div class="no-col-space">
+                                    <select class="right-sidebar-2-select" id="sidebar-option-select">
+                                        <option value="sidebar-fixed">Predeterminado</option>
+                                        <option value="sidebar-fixed-minified">Mínimo</option>
+                                        <option value="sidebar-fixed-offcanvas">Oculto</option>
+                                    </select>
+                                </div>
+                                <span class="right-sidebar-2-subtitle">Fondo del encabezado</span>
+                                <div class="no-col-space">
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 btn-right-sidebar-2-active header-light-to">Claro</a>
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 header-dark-to">Oscuro</a>
+                                </div> <span class="right-sidebar-2-subtitle">Navigation Background</span>
+                                <div class="no-col-space">
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 sidebar-light-to">Claro</a>
+                                    <a href="javascript:void(0);" class="btn-right-sidebar-2 btn-right-sidebar-2-active sidebar-dark-to">Oscuro</a>
+                                </div>
+                                <div class="d-flex justify-content-center" style="padding-top: 30px">
+                                    <div id="reset-options" style="width: auto; cursor: pointer" class="btn-right-sidebar-2 btn-reset">
+                                        Restablecer configuraciones
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <footer class="footer mt-auto">
+                <div class="copyright bg-white">
+                    <p>
+                        &copy; <span id="copy-year">2020</span> - Linda Sonrisa
+                    </p>
+                </div>
+                <script>
+                    var d = new Date();
+                    var year = d.getFullYear();
+                    document.getElementById("copy-year").innerHTML = year;
+                </script>
+            </footer>
+        </div>
+    </div>
+
+    <!-- Insert this line above script imports  -->
+    <script>if (typeof module === 'object') { window.module = module; module = undefined; }</script>
+
+    <script src="~/assets/plugins/slimscrollbar/jquery.slimscroll.min.js"></script>
+    <script src="~/assets/plugins/jekyll-search.min.js"></script>
+
+    <script src="~/assets/plugins/data-tables/jquery.datatables.min.js"></script>
+    <script src="~/assets/plugins/data-tables/datatables.bootstrap4.min.js"></script>
+    <script src="~/assets/plugins/data-tables/datatables.responsive.min.js"></script>
+    <script src="~/assets/plugins/sweetalert2/sweetalert2.all.min.js"></script>
+
+    @RenderSection("Scripts", required: false)
+
+    <script src="~/assets/js/sleek.bundle.js"></script>
+
+    <script>
+        $(document).ready(function () {
+            NProgress.done();
+        });
+    </script>
+
+    <!-- Insert this line after script imports -->
+    <script>if (window.module) module = window.module;</script>
+</body>
+</html>

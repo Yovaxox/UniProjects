@@ -1,0 +1,942 @@
+﻿
+@{ ViewData["Title"] = "Órdenes"; }
+
+@{
+    IEnumerable<Orden> ordenes = ViewData["Ordenes"] as IEnumerable<Orden>;
+    IEnumerable<DetalleOrden> detalleOrdenes = ViewData["DetalleOrdenes"] as IEnumerable<DetalleOrden>;
+}
+
+@model Orden
+
+@section Head {
+    <link href="~/assets/plugins/select2/css/select2.min.css" rel="stylesheet" />
+    <script src="~/assets/plugins/select2/js/select2.min.js"></script>
+    <script src="~/assets/plugins/select2/js/i18n/es.js"></script>
+    <script>
+        $(document).ready(function () {
+            $('#selec2-productos').select2({
+                language: "es",
+                dropdownAutoWidth: true,
+                width: 'resolve'
+            });
+        });
+    </script>
+
+    <style>
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #e5e9f2;
+        }
+    </style>
+}
+
+<form name="Create" type="hidden" asp-action="Create"></form>
+<form name="Edit" type="hidden" asp-action="Edit"></form>
+<input name="ChangeStatus" value='@Url.Action("ChangeStatus","Modulos")' hidden>
+<input name="Proveedores" value="@Url.Action("GetAllForOrden","Proveedores")" hidden />
+<input name="Productos" value="@Url.Action("GetAllByProveedor","Productos")" hidden />
+
+<div class="content">
+    <div class="breadcrumb-wrapper breadcrumb-contacts">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0">
+                    <li class="breadcrumb-item">
+                        <a href="index.html">
+                            <span class="mdi mdi-home"></span>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a>
+                            <span class="mdi mdi-cart"></span>
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="loadModalAdd()">
+                <i class=" mdi mdi-plus mr-1"></i> Nuevo
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-header card-header-border-bottom d-flex justify-content-between">
+                    <h2>Órdenes de compra</h2>
+                </div>
+                <div class="card-body">
+                    <div class="basic-data-table">
+                        <table id="basic-data-table" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Id)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.DetalleOrden)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.SolicitadoEl)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FueRecepcionada)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.ActualizadoEl)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in ordenes)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        <div class="row" style="width:25rem">
+                                            @foreach (DetalleOrden detalle in detalleOrdenes.Where(d => d.OrdenId == item.Id))
+                                            {
+                                                <div class="col-lg-9">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12 mb-1">
+                                                            <input class="form-control" value="@detalle.Producto.Titulo" disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div class="col-lg-3">
+                                                    <div class="form-row">
+                                                        <div class="col-md-12 mb-1">
+                                                            <input class="form-control" style="text-align: center;" value="@detalle.Cantidad" disabled>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            }
+                                        </div>
+                                    </td>
+                                    <td class="sorting_1">
+                                        <span style="display:none;">@item.SolicitadoEl.ToString("yyyyMMddHHmm")</span>@item.SolicitadoEl.ToString("dd/MM/yyyy HH:mm")
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FueRecepcionada)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.ActualizadoEl)
+                                    </td>
+                                    <td style="vertical-align: middle;">
+                                        <button class="btn btn-primary" type="button" style="padding:0.3rem 0.5rem" onclick="loadModalView('@Url.Action("Get","Modulos",new {id=item.Id})')">
+                                            <i class="mdi mdi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" type="button" style="padding:0.3rem 0.5rem" onclick="actionDelete('@Url.Action("Delete","Modulos",new {id=item.Id})')">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                        }
+                                </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-model" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form id="ActionForm">
+                <div id="modal-header" class="modal-header px-4">
+                    <h5 class="modal-title">Crear órden</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body px-4">
+                    <div id="ValidationSummary"></div>
+                    <div id="DV_content" class="row mb-2">
+                        <div class="col-md-12">
+                            <div class="form-row">
+                                <label for="selec2-productos">Seleccione los productos</label>
+                                <select class="js-example-basic-multiple form-control mb-5" id="selec2-productos" name="productos[]" multiple="multiple" style="width: 100%">
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="DV_items" class="basic-data-table" style="display:none">
+                        <table id="DT_items" class="table nowrap" style="width:100%;">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        Producto
+                                    </th>
+                                    <th>
+                                        Cantidad
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div id="modal-footer" class="modal-footer px-4">
+                    <button id="ActionButton" onclick="nextAction()" type="button" class="btn btn-primary btn-default">Siguiente</button>
+                    <button id="SubmitButton" type="submit" class="btn btn-primary btn-default" style="display:none;">Enviar al formulario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        jQuery(document).ready(function () {
+
+            jQuery('#basic-data-table').removeAttr('width').DataTable({
+                "autoWidth": false,
+                "aLengthMenu": [[10, 25, 50, -1], [10, 25, 50, "Todos"]],
+                "pageLength": 10,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    null,
+                    null,
+                    { "sType": "date-uk"},
+                    null,
+                    { "sType": "date-uk" },
+                    { "orderable": false, "width": "5%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar_MENU_registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+
+            jQuery('#DT_items').DataTable({
+                "aLengthMenu": [[5, 10, 15, -1], [5, 10, 15, "Todos"]],
+                "pageLength": 5,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    { "width": "50%" },
+                    { "orderable": false, "width": "50%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar _MENU_ registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-uk-pre": function (a) {
+                var ukDatea = a.split('/');
+                return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
+            },
+
+            "date-uk-asc": function (a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+
+            "date-uk-desc": function (a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
+        function nextAction() {
+            var table = $('#DT_items').DataTable();
+            var productos = $("#selec2-productos").select2("val");
+
+            if (productos.length > 0) {
+                $("#selec2-productos option").each(function () {
+                    var option = $(this);
+                    productos.forEach(function (item, index, array) {
+                        if (item == option.val()) {
+                            table.row.add([
+                                option.text(),
+                                `<input class="form-control" type="number" min="1" max="999999999" value="0" name="${option.val()}" form="ActionForm" required>`,
+                            ]).draw(false);
+                        }
+                    });
+                });
+
+                $("#DV_content").hide();
+                $("#DV_items").show();
+                $("#ActionButton").attr("onclick", "previousAction()");
+                $("#ActionButton").attr('class', 'btn btn-secondary btn-default');
+                $("#ActionButton").html('Anterior');
+                $("#SubmitButton").show();
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Oops...',
+                    text: 'No se ha seleccionado ningún producto',
+                    confirmButtonColor: '#3fabad'
+                });
+            };
+        }
+
+        function previousAction() {
+            $("#SubmitButton").hide();
+            $("#DV_items").hide();
+            $("#DV_content").show();
+            $("#ActionButton").attr("onclick", "nextAction()");
+            $("#ActionButton").attr('class', 'btn btn-primary btn-default');
+            $("#ActionButton").html('Siguiente');
+
+            $('#DT_items').DataTable().clear().draw();
+        }
+
+        function reset() {
+            $("#selec2-productos").val('');
+            $("#SubmitButton").hide();
+            $("#DV_items").hide();
+            $("#DV_content").show();
+            $("#ActionButton").attr("onclick", "nextAction()");
+            $("#ActionButton").attr('class', 'btn btn-primary btn-default');
+            $("#ActionButton").html('Siguiente');
+
+            $('#DT_items').DataTable().clear().draw();
+            $("#ValidationSummary").html('');
+        }
+
+        $('#modal-model').on('hidden.bs.modal', function () {
+            reset();
+        })
+
+        function loadModalAdd() {
+
+            var url = $('input[name="Proveedores"]').val();
+
+            $.ajax({
+                type: "get",
+                datatype: "json",
+                url: url,
+            }).done(function (data) {
+                if (data.success) {
+
+                    var options = {};
+                    $.map(data.proveedores,
+                        function (item) {
+                            options[item.id] = item.nombre;
+                        });
+
+                    (async () => {
+
+                        const { value: id } = await Swal.fire({
+                            title: 'Crear orden',
+                            input: 'select',
+                            inputOptions: options,
+                            inputPlaceholder: 'Seleccione un proveedor',
+                            confirmButtonColor: '#3fabad',
+                            confirmButtonText: 'Listo',
+                            cancelButtonText: 'Cancelar',
+                            showCancelButton: true,
+                            inputValidator: (value) => {
+                                return new Promise((resolve) => {
+                                    if (value > 0) {
+                                        resolve()
+                                    } else {
+                                        resolve('Debe seleccionar un proveedor')
+                                    }
+                                })
+                            }
+                        })
+
+                        if (id) {
+
+                            url = $('input[name="Productos"]').val();
+
+                            $.ajax({
+                                type: "get",
+                                datatype: "json",
+                                url: url,
+                                data: {
+                                    id: id,
+                                }
+                            }).done(function (data) {
+                                if (data.success) {
+
+                                    var productos = []
+                                    data.productos.forEach(function (item, index) {
+                                        var producto = {
+                                            id: item.id,
+                                            text: item.titulo
+                                        }
+                                        productos.push(producto)
+                                    });
+
+                                    $("#selec2-productos").select2({
+                                        data: productos
+                                    })
+                                }
+                            })
+
+                            var content = `<h5 class="modal-title" id="exampleModalLongTitle2">Crear órden</h5>
+                                                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"">
+                                                        <span aria-hidden="true">×</span>
+                                                    </button>`;
+
+                            var header = $('#modal-header');
+                            header.attr("class", "modal-header px-4");
+
+                            header.html(content);
+
+                            $("#ActionForm").attr("action", $("[name='Create']").attr("action"));
+                            $("#ActionForm").attr("method", $("[name='Create']").attr("method"));
+                            $("#ActionForm").attr("enctype", $("[name='Create']").attr("enctype"));
+                            $("#ActionForm").attr("name", "CreateForm");
+
+                            $('#modal-footer').show();
+
+                            $('#modal-model').modal({
+                                backdrop: 'static'
+                            });
+                        } 
+
+                    })()
+                } else {
+                    Swal.fire({
+                        icon: 'error',
+                        title: data.message,
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+                console.log("code http", jqXHR.status)
+                switch (jqXHR.status) {
+                    case 400:
+                        alert("Favor completar las variables correctamente");
+                        $("#SubmitLoginButton").prop("disabled", false);
+                        break;
+                    case 500:
+                        alert("Se ha generado un error en el servidor");
+                        $("#SubmitLoginButton").prop("disabled", false);
+                        break;
+                    case 403:
+                        alert("Ud no está autorizado para ver esta informacion");
+                        $("#SubmitLoginButton").prop("disabled", false);
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
+
+        $(function () {
+            $("#ActionForm").submit(function (e) {
+                e.preventDefault();
+
+                if ($(this).attr("name") == "CreateForm") {
+
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        text: "Se enviará el formulario",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, envíalo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+                        if (result.value) {
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            var table = $('#DT_items').DataTable();
+                            var inputs = table.$('input').serializeArray();
+
+                            $.ajax({
+                                contentType: "application/json; charset=utf-8",
+                                url: formAction,
+                                data: JSON.stringify(inputs),
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+                        }
+                    })
+                }
+
+                if ($(this).attr("name") == "EditForm") {
+
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        text: "Se enviará el formulario",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, envíalo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+                        if (result.value) {
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            $.ajax({
+                                url: formAction,
+                                data: {
+                                    __RequestVerificationToken: token,
+                                    Id: $('#Id').val(),
+                                    HoraInicio: $('#HoraInicio').val(),
+                                    HoraTermino: $('#HoraTermino').val(),
+                                    UsuarioId: $('#UsuarioId').val(),
+                                    ServicioId: $('#ServicioId').val(),
+                                    DiaId: $('#DiaId').val(),
+                                    Box: $('#Box').val(),
+                                },
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+                        }
+                    })
+                }
+            });
+        });
+
+        function displayValidationErrors(errors) {
+            var $div = $("#ValidationSummary");
+
+            $div.html(`<div class="alert alert-danger alert-dismissible" role="alert">
+                                                            <h4 class="alert-heading" style="margin-bottom: 1rem;">Errores!</h4>
+                                                            <div id="ListOfErors">
+                                                            </div>
+                                                            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                            <span aria-hidden="true">&times;</span>
+                                                            </button>
+                                                       </div >`);
+
+            var $list = $("#ListOfErors");
+
+            $list.empty();
+
+            var $length = errors.length;
+
+            $.each(errors, function (idx, errorMessage) {
+
+                var $hr = '<hr>';
+
+                if ((idx + 1) == $length) {
+                    $hr = '';
+                }
+
+                $list.append('<p class="mt-1">' + errorMessage + '</p>' + $hr);
+            });
+        };
+
+        function actionDelete(url) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, elimínalo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Delete",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha sido eliminado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        function actionChange() {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            var estado;
+
+            if ($('#Disponible').val() == '1') {
+                estado = 'Activo';
+            }
+
+            if ($('#Disponible').val() == '0') {
+                estado = 'Inactivo';
+            }
+
+            var url = $('input[name="ChangeStatus"]').val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: `El estado actual es: ${estado}`,
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, cámbialo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Post",
+                        data: {
+                            __RequestVerificationToken: token,
+                            id: $('#Id').val(),
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha cambiado su estado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        jQuery(document).ajaxStart(function () {
+            NProgress.configure({ showSpinner: false });
+            NProgress.start();
+        });
+
+        jQuery(document).ajaxStop(function () {
+            NProgress.done();
+        });</script>
+}

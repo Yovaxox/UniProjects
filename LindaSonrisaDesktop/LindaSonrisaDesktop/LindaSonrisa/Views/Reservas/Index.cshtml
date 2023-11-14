@@ -1,0 +1,972 @@
+﻿@model Reserva
+@{
+    ViewData["Title"] = "Reservas";
+    IEnumerable<LindaSonrisa.Models.Context.Reserva> reservas = ViewData["Reservas"] as IEnumerable<LindaSonrisa.Models.Context.Reserva>;
+}
+
+@section Head {
+
+    <style>
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #e5e9f2;
+        }
+    </style>
+}
+
+<input name="Create" type="hidden" value='@Url.Action("Create","Reservas")'>
+<input name="ChangeStatus" type="hidden" value='@Url.Action("ChangeStatus","Reservas")'>
+<input name="OdontologosByServicio" type="hidden" value='@Url.Action("GetByServicio","Empleados")'>
+<input name="ModulosByServicio" type="hidden" value='@Url.Action("GetByServicio","Modulos")'>
+<input name="ModulosByOdontologo" type="hidden" value='@Url.Action("GetByOdontologo","Modulos")'>
+<input name="ReservasByModulo" type="hidden" value='@Url.Action("GetByModulos","Reservas")'>
+<input name="Clientes" type="hidden" value='@Url.Action("GetAllForReserva","Clientes")'>
+
+<div class="content">
+    <div class="breadcrumb-wrapper breadcrumb-contacts">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0">
+                    <li class="breadcrumb-item">
+                        <a href="index.html">
+                            <span class="mdi mdi-home"></span>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a>
+                            <span class="mdi mdi-calendar"></span>
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="loadModalAdd()">
+                <i class=" mdi mdi-plus mr-1"></i> Nuevo
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-header card-header-border-bottom d-flex justify-content-between">
+                    <h2>Reservas de hora</h2>
+                </div>
+                <div class="card-body">
+                    <div class="basic-data-table">
+                        <table id="basic-data-table" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FechaReserva)
+                                    </th>
+                                    <th>
+                                        @Html.Raw("Hora")
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.UsuarioId)
+                                    </th>
+                                    <th>
+                                        @Html.Raw("Servicio")
+                                    </th>
+                                    <th>
+                                        @Html.Raw("Odontólogo(a)")
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.ModuloId)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FueAnulada)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in reservas)
+                                {
+                                    <tr>
+                                        <td style="vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.FechaReserva)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.Modulo.HoraInicio)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.Raw(item.Usuario.Nombre + " " + item.Usuario.ApPaterno + " " + item.Usuario.ApMaterno)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.Modulo.Servicio.Titulo)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.Raw(item.Modulo.Usuario.Nombre + " " + item.Modulo.Usuario.ApPaterno + " " + item.Modulo.Usuario.ApMaterno)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.DisplayFor(modelItem => item.Modulo.Id)
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            @Html.Raw(item.FueAnulada == '0' ? "No" : "Si")
+                                        </td>
+                                        <td style="vertical-align: middle;">
+                                            <button class="btn btn-warning" type="button" style="padding:0.3rem 0.5rem" onclick="actionAnular('@Url.Action("Anular","Reservas",new {id=item.Id})')">
+                                                <i class="mdi mdi-cancel"></i>
+                                            </button>
+                                            <button class="btn btn-danger" type="button" style="padding:0.3rem 0.5rem" onclick="actionDelete('@Url.Action("Delete","Reservas",new {id=item.Id})')">
+                                                <i class="mdi mdi-delete"></i>
+                                            </button>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-model" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <div id="modal-header" class="modal-header px-4">
+                <h5 class="modal-title" id="exampleModalLongTitle2">Crear reserva</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">×</span>
+                </button>
+            </div>
+            <div class="modal-body px-4">
+                <div id="ValidationSummary"></div>
+                <fieldset>
+                    <div class="basic-data-table mb-4" style="margin-bottom: 1rem;">
+                        <table id="DT_clientes" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>RUN</th>
+                                    <th>Nombre</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                    <hr />
+                    <div class="row mb-2 mt-4">
+                        <div class="col-lg-12">
+                            <div class="form-row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="UsuarioId" class="control-label"></label>
+                                    <select asp-for="UsuarioId" class="form-control" required disabled>
+                                        <option hidden selected value="">Seleccione un cliente desde la tabla</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="ServicioId" class="control-label">Servicio</label>
+                                    <select id="ServicioId" class="form-control" asp-items="ViewBag.ServicioId" required>
+                                        <option hidden selected value="">Selecciona una opción</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-row">
+                                <div class="col-md-12 mb-3">
+                                    <label for="OdontologoId" class="control-label">Odontólogo (opcional)</label>
+                                    <select id="OdontologoId" class="form-control" disabled>
+                                        <option hidden selected value="">Selecciona una opción</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-lg-12">
+                            <div class="form-row">
+                                <div class="col-md-12 mb-3">
+                                    <label asp-for="ModuloId" class="control-label"></label>
+                                    <select asp-for="ModuloId" class="form-control" disabled>
+                                        <option hidden selected value="">Selecciona una opción</option>
+                                    </select>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div id="DV_modulos" class="basic-data-table" style="display: none;">
+                        <table id="DT_modulos" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>Fecha</th>
+                                    <th>Estado</th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
+                </fieldset>
+            </div>
+            <div id="modal-footer" class="modal-footer px-4">
+                <button class="mb-1 btn btn-primary" type="button" onclick="resetForm()">
+                    <i class="mdi mdi-broom"></i>
+                </button>
+                <button type="button" class="btn btn-secondary btn-default" onclick="closeModel()">Cancelar</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        jQuery(document).ready(function () {
+
+            jQuery('#basic-data-table').DataTable({
+                "aLengthMenu": [[50, 100, 150, -1], [50, 100, 150, "Todos"]],
+                "pageLength": 50,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    { "sType": "date-uk" },
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    null,
+                    { "orderable": false, "width": "5%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar_MENU_registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+        });
+
+        function resetForm() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Se reiniciará el formulario",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, reinícialo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    reset();
+                }
+            })
+        }
+
+        function reset() {
+            $("#ValidationSummary").html('');
+
+            DT_clientes()
+
+            if ($.fn.DataTable.isDataTable('#DT_modulos')) {
+                $("#DV_modulos").hide();
+                $('#DT_modulos').DataTable().clear().destroy();
+            }
+
+            $('#ServicioId').val('')
+            $('#UsuarioId').html(`<option hidden selected value="">Seleccione un cliente desde la tabla</option>`);
+            $('#OdontologoId').html(`<option hidden selected value="">Selecciona una opción</option>`).prop('disabled', true);
+            $('#ModuloId').html(`<option hidden selected value="">Selecciona una opción</option>`).prop('disabled', true);
+        }
+
+        function DT_clientes() {
+            if ($.fn.DataTable.isDataTable('#DT_clientes')) {
+                $('#DT_clientes').DataTable().clear().destroy();
+            }
+
+            if (!$.fn.DataTable.isDataTable('#DT_clientes')) {
+
+                var url = $('input[name="Clientes"]').val();
+
+                $('#DT_clientes').removeAttr('width').DataTable({
+                    "autoWidth": false,
+                    "aLengthMenu": [[5], [5]],
+                    "pageLength": 5,
+                    "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                    "ajax": {
+                        "url": url,
+                        "type": "get",
+                        "datatype": "json",
+                    },
+                    "columns": [
+                        { "data": "run", "width": "10%" },
+                        {
+                            "data": function (data) {
+
+                                var nombre = data.nombre + ' ' + data.apPaterno + ' ' + data.apMaterno;
+
+                                return `${nombre}`
+
+                            }, "width": "85%"
+                        },
+                        {
+                            "data": function (data) {
+
+                                var nombre = data.nombre + ' ' + data.apPaterno + ' ' + data.apMaterno;
+
+                                return `<button class="btn btn-primary" type="button" style="padding:0.3rem 0.5rem" onclick="loadCliente(${data.id},'${nombre}')">
+                                                <i class="mdi mdi-cursor-default"></i>
+                                        </button>`;
+
+                            }, "width": "5%", "orderable": false
+                        }
+                    ],
+                    "language": {
+                        "lengthMenu": "Mostrar_MENU_registros",
+                        "zeroRecords": "No se encontró nada",
+                        "info": "Mostrando _TOTAL_ registro(s)",
+                        "infoEmpty": "No hay registros",
+                        "emptyTable": "No hay registros para mostrar",
+                        "loadingRecords": "Cargando...",
+                        "processing": "Procesando...",
+                        "search": "Buscar",
+                        "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                        "paginate": {
+                            "first": "Primera",
+                            "last": "Última",
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        },
+                    }
+                });
+            }
+        }
+
+        function loadModalAdd() {
+
+            DT_clientes();
+
+
+            if ($('#ServicioId option').length === 1) {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'No se encontró módulos con servicios disponibles',
+                    confirmButtonColor: '#3fabad',
+                })
+            }
+
+            $('#modal-footer').show();
+
+            $('#modal-model').modal({
+                backdrop: 'static'
+            });
+
+        }
+
+        function loadCliente(id, nombre) {
+            $('#UsuarioId').html(`<option hidden selected value="${id}">${nombre}</option>`);
+        }
+
+        function loadModalView(url) {
+
+            $.ajax({
+                type: "get",
+                url: url,
+            }).done(function (data) {
+
+                if (data.success) {
+
+                    var modulo = data.modulo;
+
+                    $('#Id').val(modulo.id);
+                    $('#HoraInicio').val(modulo.horaInicio);
+                    $('#HoraTermino').val(modulo.horaTermino);
+                    $('#ServicioId').val(modulo.servicioId);
+                    $('#DiaId').val(modulo.diaId);
+                    $('#Box').val(modulo.box);
+                    $('#UsuarioId').val(modulo.usuarioId);
+                    $('#Disponible').val(modulo.disponible);
+
+                    var content = `<button type="button" class="btn-edit-icon" onclick="loadModalEdit()">
+                                          <i class="mdi mdi-pencil"></i>
+                                        </button>
+                                        <div class="dropdown">
+                                          <button class="btn-dots-icon" type="button" id="dropdownMenuButton" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                                            <i class="mdi mdi-dots-vertical"></i>
+                                          </button>
+                                          <div class="dropdown-menu dropdown-menu-right" aria-labelledby="dropdownMenuButton">
+                                            <a class="dropdown-item" href="javascript:0" onclick="actionChange()">Cambiar estado</a>
+                                          </div>
+                                        </div>
+                                        <button type="button" class="btn-close-icon" data-dismiss="modal" aria-label="Close"">
+                                          <i class="mdi mdi-close"></i>
+                                   </button>`;
+
+                    var header = $('#modal-header');
+
+                    header.attr("class", "modal-header justify-content-end border-bottom-0");
+                    header.html(content);
+
+                    $('fieldset').prop('disabled', true);
+
+
+                    $('#modal-footer').hide();
+
+
+                    $('#modal-model').modal({
+                        backdrop: 'static'
+                    });
+
+                }
+                else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message,
+                        confirmButtonColor: '#3fabad'
+                    });
+
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                switch (jqXHR.status) {
+                    case 400:
+                        alert("Favor completar las variables correctamente");
+                        break;
+                    case 500:
+                        alert("Se ha generado un error en el servidor");
+                        break;
+                    case 403:
+                        alert("Ud no está autorizado para ver esta informacion");
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
+        function closeModel() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Se cerrará el formulario",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, ciérralo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $('#modal-model').modal('hide');
+                }
+            })
+        }
+
+        $('#modal-model').on('hidden.bs.modal', function () {
+            reset();
+        })
+
+        jQuery('#ServicioId').change(function () {
+            getOdontologosByServicio();
+            getModulosByServicio();
+        });
+
+        jQuery('#OdontologoId').change(function () {
+            if ($.fn.DataTable.isDataTable('#DT_modulos')) {
+                $("#DV_modulos").hide();
+                $('#DT_modulos').DataTable().clear().destroy();
+            }
+            getModulosByOdontologo();
+        });
+
+        jQuery('#ModuloId').change(function () {
+
+            if ($.fn.DataTable.isDataTable('#DT_modulos')) {
+                $("#DV_modulos").hide();
+                $('#DT_modulos').DataTable().clear().destroy();
+            }
+
+            if (!$.fn.DataTable.isDataTable('#DT_modulos')) {
+
+                var url = $('input[name="ReservasByModulo"]').val();
+                var moduloId = $('#ModuloId').children("option:selected").val();
+
+                $('#DT_modulos').DataTable({
+                    "dom": '<"row justify-content-between top-information"if>rt<"row justify-content-between bottom-information"p><"clear">',
+                    "scrollY": "250px",
+                    "scrollCollapse": true,
+                    "paging": false,
+                    "ajax": {
+                        "url": url,
+                        "type": "GET",
+                        "datatype": "json",
+                        "data": {
+                            id: moduloId,
+                        },
+                    },
+                    "columns": [
+                        { "data": "fecha", "sType": "date-uk", "width": "45%" },
+                        { "data": "estado", "width": "45%" },
+                        {
+                            "data": function (data) {
+
+                                if (data.isDisabled) {
+                                    return `<button class="btn btn-secondary" type="button" style="width: 7rem;" disabled>
+                                                Reservado
+                                                </button>`;
+                                } else {
+
+                                    return `<button class="btn btn-primary" type="button" style="width: 7rem;" onclick="actionCreate('${data.fecha}')">
+                                                Reservar
+                                                </button>`;
+                                }
+
+                            }, "width": "10%", "orderable": false
+                        }
+                    ],
+                    "language": {
+                        "lengthMenu": "Mostrar_MENU_registros",
+                        "zeroRecords": "No se encontró nada",
+                        "info": "Mostrando _TOTAL_ registro(s)",
+                        "infoEmpty": "No hay registros",
+                        "emptyTable": "No hay registros para mostrar",
+                        "loadingRecords": "Cargando...",
+                        "processing": "Procesando...",
+                        "search": "Buscar",
+                        "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                        "paginate": {
+                            "first": "Primera",
+                            "last": "Última",
+                            "next": "Siguiente",
+                            "previous": "Anterior"
+                        },
+                    }
+                });
+
+                $("#DV_modulos").show();
+            }
+        });
+
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "date-uk-pre": function (a) {
+                var ukDatea = a.split('/');
+                return (ukDatea[2] + ukDatea[1] + ukDatea[0]) * 1;
+            },
+
+            "date-uk-asc": function (a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+
+            "date-uk-desc": function (a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+
+        function actionCreate(fecha) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            var url = $('input[name="Create"]').val();
+
+            $("#ValidationSummary").html('');
+
+            Swal.fire({
+                title: '¿Confirmas la reserva?',
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, resérvalo!',
+                cancelButtonText: 'No'
+
+            }).then((result) => {
+                if (result.value) {
+
+                    $(':button').prop("disabled", true);
+
+                    $.ajax({
+                        type: "post",
+                        data: {
+                            __RequestVerificationToken: token,
+                            fecha: fecha,
+                            ModuloId: $('#ModuloId').val(),
+                            UsuarioId: $('#UsuarioId').val(),
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+
+                            $(':button').prop("disabled", false);
+
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+
+                            $(':button').prop("disabled", false);
+
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Oops...',
+                                text: data.message,
+                                confirmButtonColor: '#3fabad'
+                            });
+
+                            if (typeof data.errors !== 'undefined') {
+                                displayValidationErrors(data.errors);
+                            }
+
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        $(':button').prop("disabled", false);
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+                }
+            })
+        }
+
+
+        function getOdontologosByServicio() {
+            var servicioId = $('#ServicioId').children("option:selected").val();
+
+            var select = $('#OdontologoId');
+
+            var url = $('input[name="OdontologosByServicio"]').val();
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    id: servicioId,
+                },
+                success: function (data) {
+                    select.html(`<option hidden selected value="">Selecciona una opción</option>`);
+                    $.each(data.empleados, function (idx, option) {
+                        select.append('<option value="' + option.value + '">' + option.text + '</option>');
+                    });
+
+                    select.prop('disabled', false);
+                }
+            });
+        }
+
+        function getModulosByServicio() {
+
+            var servicioId = $('#ServicioId').children("option:selected").val();
+
+            var select = $('#ModuloId');
+
+            var url = $('input[name="ModulosByServicio"]').val();
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    id: servicioId,
+                },
+                success: function (data) {
+
+                    select.html(`<option hidden selected value="">Selecciona una opción</option>`);
+                    $.each(data.modulos, function (idx, option) {
+                        select.append('<option value="' + option.value + '">' + option.text + '</option>');
+                    });
+
+                    select.prop('disabled', false);
+                }
+            });
+        }
+
+        function getModulosByOdontologo() {
+
+            var odontologoId = $('#OdontologoId').children("option:selected").val();
+            var servicioId = $('#ServicioId').children("option:selected").val();
+
+            var select = $('#ModuloId');
+
+            var url = $('input[name="ModulosByOdontologo"]').val();
+
+            $.ajax({
+                url: url,
+                type: "GET",
+                data: {
+                    odontologoId: odontologoId,
+                    servicioId: servicioId,
+                },
+                success: function (data) {
+
+                    select.html(`<option hidden selected value="">Selecciona una opción</option>`);
+                    $.each(data.modulos, function (idx, option) {
+                        select.append('<option value="' + option.value + '">' + option.text + '</option>');
+                    });
+
+                    select.prop('disabled', false);
+                }
+            });
+        }
+
+        function displayValidationErrors(errors) {
+            var $div = $("#ValidationSummary");
+
+            $div.html(`<div class="alert alert-danger alert-dismissible" role="alert">
+                                                <h4 class="alert-heading" style="margin-bottom: 1rem;">Errores!</h4>
+                                                <div id="ListOfErors">
+                                                </div>
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                           </div >`);
+
+            var $list = $("#ListOfErors");
+
+            $list.empty();
+
+            var $length = errors.length;
+
+            $.each(errors, function (idx, errorMessage) {
+
+                var $hr = '<hr>';
+
+                if ((idx + 1) == $length) {
+                    $hr = '';
+                }
+
+                $list.append('<p class="mt-1">' + errorMessage + '</p>' + $hr);
+            });
+        };
+
+        function actionDelete(url) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, elimínalo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Delete",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha sido eliminado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        function actionAnular(url) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, anúlalo!',
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Post",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha cambiado su estado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        jQuery(document).ajaxStart(function () {
+            NProgress.configure({ showSpinner: false });
+            NProgress.start();
+        });
+
+        jQuery(document).ajaxStop(function () {
+            NProgress.done();
+        });
+    </script>
+}

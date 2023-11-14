@@ -1,0 +1,851 @@
+﻿@model LindaSonrisa.Models.Views.Categoria
+@{ 
+    ViewData["Title"] = "Categorías";
+    IEnumerable<LindaSonrisa.Models.Context.TipoProducto> tipoProductos = ViewData["TipoProductos"] as IEnumerable<LindaSonrisa.Models.Context.TipoProducto>; 
+    IEnumerable<LindaSonrisa.Models.Context.FamiliaProducto> familiaProductos = ViewData["FamiliaProductos"] as IEnumerable<LindaSonrisa.Models.Context.FamiliaProducto>; 
+}
+
+@section Head {
+
+    <style>
+        .table td {
+            padding: 0.75rem;
+            vertical-align: middle;
+            border-top: 1px solid #e5e9f2;
+        }
+    </style>
+}
+
+<form name="Create" type="hidden" asp-action="Create"></form>
+<form name="Edit" type="hidden" asp-action="Edit"></form>
+<input name="FamiliaProductos" value='@Url.Action("GetAll","Categorias")' hidden/>
+
+<div class="content">
+    <div class="breadcrumb-wrapper breadcrumb-contacts">
+        <div>
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb p-0">
+                    <li class="breadcrumb-item">
+                        <a href="index.html">
+                            <span class="mdi mdi-home"></span>
+                        </a>
+                    </li>
+                    <li class="breadcrumb-item">
+                        <a>
+                            <span class="mdi mdi-dots-horizontal-circle-outline"></span>
+                        </a>
+                    </li>
+                </ol>
+            </nav>
+
+        </div>
+        <div>
+            <button type="button" class="btn btn-primary" onclick="loadModalAdd()">
+                <i class=" mdi mdi-plus mr-1"></i> Nuevo
+            </button>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default">
+                <div class="card-header card-header-border-bottom d-flex justify-content-between">
+                    <h2>Tipos de producto</h2>
+                </div>
+                <div class="card-body">
+                    <div class="basic-data-table">
+                        <table id="DT_tipo_productos" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Id)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Titulo)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.FamiliaProductoId)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in tipoProductos)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Titulo)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.FamiliaProducto.Titulo)
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" type="button" style="padding:0.3rem 0.5rem" onclick="loadModalView('@Url.Action("Get","Categorias",new {id=item.Id, categoria=0})')">
+                                            <i class="mdi mdi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" type="button" style="padding:0.3rem 0.5rem" onclick="actionDelete('@Url.Action("Delete","Categorias",new {id=item.Id, categoria=0})')">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <hr />
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card card-default" style="margin-top: 1.5rem;">
+                <div class="card-header card-header-border-bottom d-flex justify-content-between">
+                    <h2>Familias de producto</h2>
+                </div>
+                <div class="card-body">
+                    <div class="basic-data-table">
+                        <table id="DT_familia_productos" class="table nowrap" style="width:100%">
+                            <thead>
+                                <tr>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Id)
+                                    </th>
+                                    <th>
+                                        @Html.DisplayNameFor(model => model.Titulo)
+                                    </th>
+                                    <th></th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var item in familiaProductos)
+                                {
+                                <tr>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Id)
+                                    </td>
+                                    <td>
+                                        @Html.DisplayFor(modelItem => item.Titulo)
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-primary" type="button" style="padding:0.3rem 0.5rem" onclick="loadModalView('@Url.Action("Get","Categorias",new {id=item.Id, categoria=1})')">
+                                            <i class="mdi mdi-eye"></i>
+                                        </button>
+                                        <button class="btn btn-danger" type="button" style="padding:0.3rem 0.5rem" onclick="actionDelete('@Url.Action("Delete","Categorias",new {id=item.Id, categoria=1})')">
+                                            <i class="mdi mdi-delete"></i>
+                                        </button>
+                                    </td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="modal-model" tabindex="-1" role="dialog" aria-labelledby="exampleModalCenterTitle"
+     aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+        <div class="modal-content">
+            <form id="ActionForm" autocomplete="off">
+                <div id="modal-header" class="modal-header px-4">
+                    <h5 class="modal-title" id="exampleModalLongTitle2">Crear contacto</h5>
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                        <span aria-hidden="true">×</span>
+                    </button>
+                </div>
+                <div class="modal-body px-4">
+                    <div id="ValidationSummary"></div>
+                    <input asp-for="Id" type="hidden" />
+                    <input asp-for="CategoriaId" type="hidden" />
+                    <fieldset>
+                        <div class="row mb-2">
+                            <div class="col-lg-12">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="Titulo" class="control-label"></label>
+                                        <input asp-for="Titulo" class="form-control" type="text" maxlength="50" required />
+                                    </div>
+                                </div>
+                            </div>
+                            <div id="DV_FamiliaProductoId" class="col-lg-12">
+                                <div class="form-row">
+                                    <div class="col-md-12 mb-3">
+                                        <label asp-for="FamiliaProductoId" class="control-label"></label>
+                                        <select asp-for="FamiliaProductoId" class="form-control">
+                                            <option hidden selected value="">Selecciona una opción</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+                <div id="modal-footer" class="modal-footer px-4">
+                    <button type="button" class="btn btn-secondary btn-default" onclick="closeModel()">Cancelar</button>
+                    <button id="SubmitButton" type="submit" class="btn btn-primary btn-default">Enviar al formulario</button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+
+        jQuery(document).ready(function () {
+
+            jQuery('#DT_tipo_productos').DataTable({
+                "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                "pageLength": 25,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    { "width": "10%" },
+                    null,
+                    null,
+                    { "orderable": false, "width": "5%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar_MENU_registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+
+            jQuery('#DT_familia_productos').DataTable({
+                "aLengthMenu": [[25, 50, 100, -1], [25, 50, 100, "Todos"]],
+                "pageLength": 25,
+                "dom": '<"row justify-content-between top-information"lf>rt<"row justify-content-between bottom-information"ip><"clear">',
+                "columns": [
+                    { "width": "10%" },
+                    null,
+                    { "orderable": false, "width": "5%" },
+                ],
+                "language": {
+                    "lengthMenu": "Mostrar_MENU_registros",
+                    "zeroRecords": "No se encontró nada",
+                    "info": "Mostrando del _START_ al _END_ de un total de _TOTAL_ registro(s)",
+                    "infoEmpty": "No hay registros",
+                    "emptyTable": "No hay registros para mostrar",
+                    "loadingRecords": "Cargando...",
+                    "processing": "Procesando...",
+                    "search": "Buscar",
+                    "infoFiltered": "(filtrado de un total de _MAX_ registro(s))",
+                    "paginate": {
+                        "first": "Primera",
+                        "last": "Última",
+                        "next": "Siguiente",
+                        "previous": "Anterior"
+                    },
+                },
+            });
+        });
+
+        function closeModel() {
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "Se cerrará el formulario",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, ciérralo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $('#modal-model').modal('hide');
+                }
+            })
+        }
+
+        $('#modal-model').on('hidden.bs.modal', function () {
+            reset();
+        })
+
+        function reset() {
+            $('#ActionForm').get(0).reset();
+            $("#ValidationSummary").html('');
+        }
+
+        async function loadModalAdd() {
+
+            await Swal.fire({
+                title: '¿Que deseas crear?',
+                input: 'select',
+                confirmButtonColor: '#3fabad',
+                inputOptions: {
+                    0: 'Tipo de producto',
+                    1: 'Familia de producto',
+                },
+                inputPlaceholder: 'Seleccione una opción',
+                showCancelButton: true,
+                inputValidator: (value) => {
+                    return new Promise((resolve) => {
+                        if (value) {
+
+                            resolve()
+
+                            $("#ActionForm").attr("action", $("[name='Create']").attr("action"));
+                            $("#ActionForm").attr("method", $("[name='Create']").attr("method"));
+                            $("#ActionForm").attr("enctype", $("[name='Create']").attr("enctype"));
+                            $("#ActionForm").attr("name", "CreateForm");
+
+                            if (value == 0) {
+                                var content = `<h5 class="modal-title" id="exampleModalLongTitle2">Crear tipo de producto</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"">
+                                            <span aria-hidden="true">×</span>
+                                        </button>`;
+
+                                var header = $('#modal-header');
+                                header.attr("class", "modal-header px-4");
+
+                                header.html(content);
+
+                                $('#CategoriaId').val(0)
+                                $('#FamiliaProductoId').prop('required', true);
+
+                                var url = $('input[name="FamiliaProductos"]').val();
+
+                                $.ajax({
+                                    url: url,
+                                    type: "get",
+                                    data: {
+                                        categoria: 1,
+                                    },
+                                    success: function (data) {
+                                        if (data.success) {
+                                            $('#FamiliaProductoId').html(`<option hidden selected value="">Selecciona una opción</option>`);
+                                            $.each(data.familiaProductos, function (idx, option) {
+                                                if (!option.estaInactivo) {
+                                                    $('#FamiliaProductoId').append('<option value="' + option.id + '">' + option.titulo + '</option>');
+                                                }
+                                            });
+                                        } else {
+                                            Swal.fire({
+                                                icon: 'error',
+                                                title: data.message,
+                                                confirmButtonColor: '#3fabad',
+                                            })
+                                        }
+                                    }
+                                });
+
+                                $('#DV_FamiliaProductoId').show();
+                            }
+
+                            if (value == 1) {
+                                var content = `<h5 class="modal-title" id="exampleModalLongTitle2">Crear familia de producto</h5>
+                                        <button type="button" class="close" data-dismiss="modal" aria-label="Close"">
+                                            <span aria-hidden="true">×</span>
+                                        </button>`;
+
+                                var header = $('#modal-header');
+                                header.attr("class", "modal-header px-4");
+
+                                header.html(content);
+
+                                $('#CategoriaId').val(1)
+                                $('#FamiliaProductoId').removeAttr('required');
+
+                                $('#DV_FamiliaProductoId').hide();
+                            }
+
+                            $('fieldset').prop('disabled', false);
+
+                            $('#modal-footer').show();
+
+                            $('#modal-model').modal({
+                                backdrop: 'static'
+                            });
+                        } else {
+                            resolve('Debes seleccionar una opción')
+                        }
+                    })
+                }
+            })
+
+        }
+
+        function loadModalView(url) {
+
+            $.ajax({
+                type: "get",
+                url: url,
+            }).done(function (data) {
+
+                if (data.success) {
+
+                    if (typeof data.tipoProducto !== 'undefined') {
+
+                        var tipoProducto = data.tipoProducto;
+
+                        $('#FamiliaProductoId').prop('required', true);
+
+                        $('#Id').val(tipoProducto.id);
+                        $('#Titulo').val(tipoProducto.titulo);
+                        $('#CategoriaId').val(0);
+
+                        url = $('input[name="FamiliaProductos"]').val();
+
+                        $.ajax({
+                            url: url,
+                            type: "get",
+                            data: {
+                                categoria: 1,
+                            },
+                            success: function (data) {
+                                if (data.success) {
+                                    $('#FamiliaProductoId').html(`<option hidden selected value="">Selecciona una opción</option>`);
+                                    $.each(data.familiaProductos, function (idx, option) {
+                                        if (!option.estaInactivo) {
+                                            $('#FamiliaProductoId').append('<option value="' + option.id + '">' + option.titulo + '</option>');
+                                        }
+                                    });
+
+                                    $('#FamiliaProductoId').val(tipoProducto.familiaProductoId);
+                                } else {
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: data.message,
+                                        confirmButtonColor: '#3fabad',
+                                    })
+                                }
+                            }
+                        });
+
+                        $('#DV_FamiliaProductoId').show();
+                    }
+
+                    if (typeof data.familiaProducto !== 'undefined') {
+
+                        var familiaProducto = data.familiaProducto;
+
+                        $('#FamiliaProductoId').removeAttr('required');
+
+                        $('#Id').val(familiaProducto.id);
+                        $('#Titulo').val(familiaProducto.titulo);
+                        $('#CategoriaId').val(1);
+
+                        $('#DV_FamiliaProductoId').hide();
+                    }
+
+                    var content = `<button type="button" class="btn-edit-icon" onclick="loadModalEdit()">
+                                          <i class="mdi mdi-pencil"></i>
+                                        </button>
+                                        <button type="button" class="btn-close-icon" data-dismiss="modal" aria-label="Close"">
+                                          <i class="mdi mdi-close"></i>
+                                        </button>`;
+
+                    var header = $('#modal-header');
+
+                    header.attr("class", "modal-header justify-content-end border-bottom-0");
+                    header.html(content);
+
+                    $('fieldset').prop('disabled', true);
+
+
+                    $('#modal-footer').hide();
+
+
+                    $('#modal-model').modal({
+                        backdrop: 'static'
+                    });
+
+                }
+                else {
+
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Oops...',
+                        text: data.message,
+                        confirmButtonColor: '#3fabad'
+                    });
+
+                }
+            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                switch (jqXHR.status) {
+                    case 400:
+                        alert("Favor completar las variables correctamente");
+                        break;
+                    case 500:
+                        alert("Se ha generado un error en el servidor");
+                        break;
+                    case 403:
+                        alert("Ud no está autorizado para ver esta informacion");
+                        break;
+                    default:
+                        break;
+                }
+            });
+        }
+
+        function loadModalEdit() {
+
+            $("#ActionForm").attr("action", $("[name='Edit']").attr("action"));
+            $("#ActionForm").attr("method", $("[name='Edit']").attr("method"));
+            $("#ActionForm").attr("enctype", $("[name='Edit']").attr("enctype"));
+            $("#ActionForm").attr("name", "EditForm");
+
+            $('fieldset').prop('disabled', false);
+
+
+            $('#modal-footer').show();
+        }
+
+        $(function () {
+            $("#ActionForm").submit(function (e) {
+                e.preventDefault();
+
+                if ($(this).attr("name") == "CreateForm") {
+
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        text: "Se enviará el formulario",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, envíalo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+                        if (result.value) {
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            $.ajax({
+                                url: formAction,
+                                data: {
+                                    __RequestVerificationToken: token,
+                                    Titulo: $("#Titulo").val(),
+                                    TituloNormalizado: $("#Titulo").val().toUpperCase(),
+                                    FamiliaProductoId: $("#FamiliaProductoId").val(),
+                                    CategoriaId: $("#CategoriaId").val(),
+                                },
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+                        }
+                    })
+                }
+
+                if ($(this).attr("name") == "EditForm") {
+
+                    Swal.fire({
+                        title: '¿Estás listo?',
+                        text: "Se enviará el formulario",
+                        icon: 'warning',
+                        showCancelButton: true,
+                        confirmButtonColor: '#3fabad',
+                        cancelButtonColor: '#d33',
+                        confirmButtonText: 'Si, envíalo!',
+                        cancelButtonText: 'No'
+
+                    }).then((result) => {
+                        if (result.value) {
+                            var formAction = $(this).attr("action");
+                            var formMethod = $(this).attr("method");
+                            var token = $("[name='__RequestVerificationToken']").val();
+                            $("#SubmitButton").prop("disabled", true);
+                            $("#ValidationSummary").html("");
+
+                            $.ajax({
+                                url: formAction,
+                                data: {
+                                    __RequestVerificationToken: token,
+                                    Id: $('#Id').val(),
+                                    Titulo: $("#Titulo").val(),
+                                    TituloNormalizado: $("#Titulo").val().toUpperCase(),
+                                    FamiliaProductoId: $("#FamiliaProductoId").val(),
+                                    CategoriaId: $("#CategoriaId").val(),
+                                },
+                                type: formMethod
+                            }).done(function (data) {
+
+                                if (data.success) {
+
+                                    let timerInterval
+                                    Swal.fire({
+                                        icon: 'success',
+                                        title: data.title,
+                                        html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                        timer: 2000,
+                                        timerProgressBar: true,
+                                        onBeforeOpen: () => {
+                                            Swal.showLoading()
+                                            timerInterval = setInterval(() => {
+                                                const content = Swal.getContent()
+                                                if (content) {
+                                                    const b = content.querySelector('b')
+                                                    if (b) {
+                                                        b.textContent = Swal.getTimerLeft()
+                                                    }
+                                                }
+                                            }, 100)
+                                        },
+                                        onClose: () => {
+                                            clearInterval(timerInterval);
+                                            location.reload();
+                                        }
+                                    }).then((result) => {
+                                        if (result.dismiss === Swal.DismissReason.timer) {
+                                            location.reload();
+                                        }
+                                    })
+                                }
+                                else {
+                                    $("#SubmitButton").prop("disabled", false);
+
+                                    Swal.fire({
+                                        icon: 'error',
+                                        title: 'Oops...',
+                                        text: data.message,
+                                        confirmButtonColor: '#3fabad'
+                                    });
+
+                                    if (typeof data.errors !== 'undefined') {
+                                        displayValidationErrors(data.errors);
+                                    }
+
+                                }
+                            }).fail(function (jqXHR, textStatus, errorThrown) {
+
+                                $("#SubmitButton").prop("disabled", false);
+
+                                switch (jqXHR.status) {
+                                    case 400:
+                                        alert("Favor completar las variables correctamente");
+                                        break;
+                                    case 500:
+                                        alert("Se ha generado un error en el servidor");
+                                        break;
+                                    case 403:
+                                        alert("Ud no está autorizado para ver esta informacion");
+                                        break;
+                                    default:
+                                        break;
+                                }
+                            });
+                        }
+                    })
+                }
+            });
+        });
+
+        function displayValidationErrors(errors) {
+            var $div = $("#ValidationSummary");
+
+            $div.html(`<div class="alert alert-danger alert-dismissible" role="alert">
+                                                <h4 class="alert-heading" style="margin-bottom: 1rem;">Errores!</h4>
+                                                <div id="ListOfErors">
+                                                </div>
+                                                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                                                <span aria-hidden="true">&times;</span>
+                                                </button>
+                                           </div >`);
+
+            var $list = $("#ListOfErors");
+
+            $list.empty();
+
+            var $length = errors.length;
+
+            $.each(errors, function (idx, errorMessage) {
+
+                var $hr = '<hr>';
+
+                if ((idx + 1) == $length) {
+                    $hr = '';
+                }
+
+                $list.append('<p class="mt-1">' + errorMessage + '</p>' + $hr);
+            });
+        };
+
+        function actionDelete(url) {
+            var token = $("[name='__RequestVerificationToken']").val();
+
+            Swal.fire({
+                title: '¿Estás seguro?',
+                text: "¡No podrás revertir esto!",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonColor: '#3fabad',
+                cancelButtonColor: '#d33',
+                confirmButtonText: 'Si, elimínalo!',
+                cancelButtonText: 'Cancelar'
+
+            }).then((result) => {
+                if (result.value) {
+                    $.ajax({
+                        type: "Delete",
+                        data: {
+                            __RequestVerificationToken: token,
+                        },
+                        url: url,
+                    }).done(function (data) {
+                        if (data.success) {
+                            let timerInterval
+                            Swal.fire({
+                                icon: 'success',
+                                title: data.title,
+                                html: 'Voy actualizar la pagina en <b></b> milisegundos.',
+                                timer: 2000,
+                                timerProgressBar: true,
+                                onBeforeOpen: () => {
+                                    Swal.showLoading()
+                                    timerInterval = setInterval(() => {
+                                        const content = Swal.getContent()
+                                        if (content) {
+                                            const b = content.querySelector('b')
+                                            if (b) {
+                                                b.textContent = Swal.getTimerLeft()
+                                            }
+                                        }
+                                    }, 100)
+                                },
+                                onClose: () => {
+                                    clearInterval(timerInterval);
+                                    location.reload();
+                                }
+                            }).then((result) => {
+                                if (result.dismiss === Swal.DismissReason.timer) {
+                                    location.reload();
+                                }
+                            })
+                        }
+                        else {
+                            Swal.fire({
+                                icon: 'error',
+                                title: data.title,
+                                confirmButtonColor: '#3fabad',
+                            })
+                        }
+                    }).fail(function (jqXHR, textStatus, errorThrown) {
+                        console.log("code http", jqXHR.status)
+                        switch (jqXHR.status) {
+                            case 400:
+                                alert("Favor completar las variables correctamente");
+                                break;
+                            case 500:
+                                alert("Se ha generado un error en el servidor");
+                                break;
+                            case 403:
+                                alert("Ud no está autorizado para ver esta informacion");
+                                break;
+                            default:
+                                break;
+                        }
+                    });
+
+                } else if (
+                    result.dismiss === Swal.DismissReason.cancel
+                ) {
+                    Swal.fire({
+                        icon: 'warning',
+                        title: 'Cancelado',
+                        text: 'El elemento seleccionado no ha sido eliminado',
+                        confirmButtonColor: '#3fabad',
+                    })
+                }
+            })
+        }
+
+        jQuery(document).ajaxStart(function () {
+            NProgress.configure({ showSpinner: false });
+            NProgress.start();
+        });
+
+        jQuery(document).ajaxStop(function () {
+            NProgress.done();
+        });
+    </script>
+}
